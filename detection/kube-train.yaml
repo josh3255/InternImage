@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: josh-internimage-dino-t-1x
+spec:
+  nodeName: zvrs13
+  restartPolicy: OnFailure
+
+  volumes:
+  - name: shmdir
+    emptyDir:
+      medium: Memory
+  - name: pvc-volume
+    persistentVolumeClaim:
+       claimName: team1-pvc
+  imagePullSecrets:
+  - name: sanghyunjo
+  
+  containers:
+  - name: gpu-container
+    image: hub.ziovision.ai/internimage/internimage:latest
+    volumeMounts:
+    - mountPath: /dev/shm
+      name: shmdir
+    - mountPath: /home/team1
+      name: pvc-volume
+    env:
+    - name: HOME
+      value: /workspace/
+    - name: PYTHONUSERBASE
+      value: /workspace/.local
+    command:
+      - "/bin/sh"
+      - "-c"
+    args:
+      - >-
+        nvidia-smi &&
+        cd /home/team1/josh/projects/InternImage/detection &&
+        bash dist_train.sh configs/coco/dino_4scale_internimage_t_1x_coco_layer_wise_lr.py 4
+
+    securityContext:
+      allowPrivilegeEscalation: false
+
+    resources:
+      requests:
+        nvidia.com/gpu: 4 # GPU 갯수(최대 4)
+      limits:
+        nvidia.com/gpu: 4

@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: josh-internimage-cascade-xl-3x-test
+spec:
+  nodeName: zvrs13
+  restartPolicy: OnFailure
+
+  volumes:
+  - name: shmdir
+    emptyDir:
+      medium: Memory
+  - name: pvc-volume
+    persistentVolumeClaim:
+       claimName: team1-pvc
+  imagePullSecrets:
+  - name: sanghyunjo
+  
+  containers:
+  - name: gpu-container
+    image: hub.ziovision.ai/internimage/internimage:latest
+    volumeMounts:
+    - mountPath: /dev/shm
+      name: shmdir
+    - mountPath: /home/team1
+      name: pvc-volume
+    env:
+    - name: HOME
+      value: /workspace/
+    - name: PYTHONUSERBASE
+      value: /workspace/.local
+    command:
+      - "/bin/sh"
+      - "-c"
+    args:
+      - >-
+        nvidia-smi &&
+        cd /home/team1/josh/projects/InternImage/detection &&
+        python test.py configs/coco/cascade_internimage_xl_fpn_3x_coco.py work_dirs/cascade_internimage_xl_fpn_3x_coco/epoch_36.pth --eval bbox
+
+    securityContext:
+      allowPrivilegeEscalation: false
+
+    resources:
+      requests:
+        nvidia.com/gpu: 1 # GPU 갯수(최대 4)
+      limits:
+        nvidia.com/gpu: 1
