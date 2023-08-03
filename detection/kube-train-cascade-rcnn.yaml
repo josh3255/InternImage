@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: josh-internimage-training-cascade-xl-5x-semi
+  
+spec:
+  restartPolicy: Never
+  nodeName: zvrs14
+  volumes:
+  - name: shmdir
+    emptyDir:
+      medium: Memory
+  - name: pvc-volume
+    persistentVolumeClaim:
+       claimName: team1-native-pvc
+
+  imagePullSecrets:
+  - name: sanghyunjo
+  
+  containers:
+  - name: gpu-container
+    image: hub.ziovision.ai/internimage/internimage:cls4
+    volumeMounts:
+    - mountPath: /dev/shm
+      name: shmdir
+    - mountPath: /home/team1
+      name: pvc-volume
+    env:
+    - name: HOME
+      value: /workspace/
+    - name: PYTHONUSERBASE
+      value: /workspace/.local
+    command:
+      - "/bin/sh"
+      - "-c"
+    args:
+      - >-
+        nvidia-smi &&
+        cd /home/team1/josh/projects/InternImage/detection &&
+        bash dist_train.sh configs/coco/cascade_internimage_xl_fpn_5x_coco_semi.py 4
+
+    securityContext:
+      allowPrivilegeEscalation: false
+
+    resources:
+      requests:
+        nvidia.com/gpu: 4 # GPU 갯수(최대 4)
+      limits:
+        nvidia.com/gpu: 4
