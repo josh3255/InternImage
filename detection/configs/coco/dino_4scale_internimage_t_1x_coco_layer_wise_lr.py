@@ -153,7 +153,7 @@ train_pipeline = [
 ]
 # By default, models are trained on 8 GPUs with 2 images per GPU
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=1,
     train=dict(pipeline=train_pipeline))
 # optimizer
 optimizer = dict(

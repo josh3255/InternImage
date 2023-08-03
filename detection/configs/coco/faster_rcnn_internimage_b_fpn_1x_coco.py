@@ -4,7 +4,7 @@
 # Licensed under The MIT License [see LICENSE for details]
 # --------------------------------------------------------
 _base_ = [
-    '../_base_/models/mask_rcnn_r50_fpn.py',
+    '../_base_/models/faster_rcnn_r50_fpn.py',
     '../_base_/datasets/coco_detection.py',
     '../_base_/schedules/schedule_1x.py',
     '../_base_/default_runtime.py'
@@ -33,7 +33,7 @@ model = dict(
         out_channels=256,
         num_outs=5))
 # By default, models are trained on 8 GPUs with 2 images per GPU
-data = dict(samples_per_gpu=2)
+data = dict(samples_per_gpu=1)
 optimizer = dict(
     _delete_=True, type='AdamW', lr=0.0001, weight_decay=0.05,
     constructor='CustomLayerDecayOptimizerConstructor',
